@@ -1,0 +1,9 @@
+[Unit]
+Description=uds2uart Service
+
+[Service]
+ExecStart=/usr/bin/uds2uart.sh
+
+[Install]
+WantedBy=multi-user.target
+

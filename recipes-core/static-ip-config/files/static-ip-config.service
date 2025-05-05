@@ -1,0 +1,9 @@
+[Unit]
+Description=static-ip-config Service
+
+[Service]
+ExecStart=/usr/bin/static-ip-config.sh
+
+[Install]
+WantedBy=multi-user.target
+

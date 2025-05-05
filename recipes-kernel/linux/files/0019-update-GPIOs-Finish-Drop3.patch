@@ -1,0 +1,133 @@
+From 650f424b5c3db89f53ce4f3769d453b651791dc2 Mon Sep 17 00:00:00 2001
+From: Orel Eliyahu <orel_e@eyal-emi.co.il>
+Date: Mon, 5 May 2025 07:11:04 +0300
+Subject: [PATCH] update GPIOs & Finish Drop3
+
+---
+ arch/arm64/boot/dts/freescale/base.dts     | 22 ++++++----------------
+ arch/arm64/boot/dts/freescale/decoder.dts  |  6 +++---
+ arch/arm64/boot/dts/freescale/gpio_named.h |  8 ++++----
+ oe-logs                                    |  2 +-
+ oe-workdir                                 |  2 +-
+ 5 files changed, 15 insertions(+), 25 deletions(-)
+
+diff --git a/arch/arm64/boot/dts/freescale/base.dts b/arch/arm64/boot/dts/freescale/base.dts
+index 7ad8396b4dd7..c503bbe0654e 100644
+--- a/arch/arm64/boot/dts/freescale/base.dts
++++ b/arch/arm64/boot/dts/freescale/base.dts
+@@ -338,31 +338,21 @@ &fec {
+ 	pinctrl-0 = <&pinctrl_fec>;
+ 	phy-mode = "rgmii-id"; // RGMII with internal delay (ID) – often needed for Marvell
+ 	phy-handle = <&ethphy1>;
+-	fsl,magic-packet;
+ 	status = "okay";
+ 
+ 	mdio {
+ 		#address-cells = <1>;
+ 		#size-cells = <0>;
+ 
+-		ethphy1: ethernet-phy@1 {
+-			compatible = "marvell,88e1512"; // 
+-			reg = <1>;
++		ethphy1: ethernet-phy@0 {
++			compatible = "marvell,88e1510"; // 
++			reg = <0>;
+ 			marvell,reg-init = <3 0x10 0 0x880>; // Optional: configure LED or clk output if needed
+-
+ 			reset-gpios = <&gpio1 5 GPIO_ACTIVE_LOW>;
+ 			reset-assert-us = <10000>;
+ 			reset-deassert-us = <80000>;
+-
+-			// Optional properties:
+-			interrupt-parent = <&gpio2>;     // If your PHY provides interrupt output
+-			interrupts = <7 IRQ_TYPE_LEVEL_LOW>;
+-
+ 			// If you know the PHY needs this (88E1512 usually doesn't need eee-broken-1000t)
+ 			// eee-broken-1000t;
+-
+-			// For disabling clkout, usually via registers instead
+-			// realtek,clkout-disable; --> Not relevant to Marvell
+ 		};
+ 	};
+ };
+@@ -873,7 +863,7 @@ MX8MP_IOMUXC_SD1_DATA6__GPIO2_IO08         0x00000106
+                 	MX8MP_IOMUXC_SD1_DATA7__GPIO2_IO09         0x00000106
+                 	MX8MP_IOMUXC_SD2_CLK__GPIO2_IO13           0x00000106
+                 	MX8MP_IOMUXC_SD2_CMD__GPIO2_IO14           0x00000106
+-                	MX8MP_IOMUXC_SD2_DATA0__GPIO2_IO15         0x00000106
++                	MX8MP_IOMUXC_SD2_DATA0__GPIO2_IO15         0x00000046
+         		MX8MP_IOMUXC_SD2_DATA1__GPIO2_IO16         0x00000106
+                 	MX8MP_IOMUXC_SD2_DATA2__GPIO2_IO17         0x00000106
+                 	MX8MP_IOMUXC_SD2_DATA3__GPIO2_IO18         0x00000106
+@@ -1093,8 +1083,8 @@ pinctrl_i2c2_synaptics_dsx_io: synaptics_dsx_iogrp {
+ 	pinctrl_uart1: uart1grp {
+ 		fsl,pins = <
+                   
+-                  MX8MP_IOMUXC_SAI2_RXC__UART1_DCE_RX        0x00000106
+-                  MX8MP_IOMUXC_SAI2_RXFS__UART1_DCE_TX       0x00000106
++                MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX       0x00000106
++                MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX       0x00000106
+ 		>;
+ 	};
+ 
+diff --git a/arch/arm64/boot/dts/freescale/decoder.dts b/arch/arm64/boot/dts/freescale/decoder.dts
+index 8d1fbcfb9055..ceae30d2eec9 100644
+--- a/arch/arm64/boot/dts/freescale/decoder.dts
++++ b/arch/arm64/boot/dts/freescale/decoder.dts
+@@ -869,7 +869,7 @@ MX8MP_IOMUXC_SD1_DATA6__GPIO2_IO08         0x00000106
+                 	MX8MP_IOMUXC_SD1_DATA7__GPIO2_IO09         0x00000106
+                 	MX8MP_IOMUXC_SD2_CLK__GPIO2_IO13           0x00000106
+                 	MX8MP_IOMUXC_SD2_CMD__GPIO2_IO14           0x00000106
+-                	MX8MP_IOMUXC_SD2_DATA0__GPIO2_IO15         0x00000106
++                	MX8MP_IOMUXC_SD2_DATA0__GPIO2_IO15         0x00000046
+         		MX8MP_IOMUXC_SD2_DATA1__GPIO2_IO16         0x00000106
+                 	MX8MP_IOMUXC_SD2_DATA2__GPIO2_IO17         0x00000106
+                 	MX8MP_IOMUXC_SD2_DATA3__GPIO2_IO18         0x00000106
+@@ -939,8 +939,8 @@ MX8MP_IOMUXC_ECSPI1_SCLK__ECSPI1_SCLK      0x00000106
+ 
+ 	pinctrl_ecspi1_cs: ecspi1cs {
+ 		fsl,pins = <
+-                  MX8MP_IOMUXC_ECSPI1_SS0__GPIO5_IO09        0x00000106
+-            	  MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06         0x00000106
++                  MX8MP_IOMUXC_ECSPI1_SS0__GPIO5_IO09        0x00000006
++            	  MX8MP_IOMUXC_SD1_DATA4__GPIO2_IO06         0x00000006
+ 		>;
+ 	};	
+ 	
+diff --git a/arch/arm64/boot/dts/freescale/gpio_named.h b/arch/arm64/boot/dts/freescale/gpio_named.h
+index a3e40d2451ac..da37dd86e5dc 100644
+--- a/arch/arm64/boot/dts/freescale/gpio_named.h
++++ b/arch/arm64/boot/dts/freescale/gpio_named.h
+@@ -3,10 +3,10 @@
+         compatible = "kratos,kratos_station-pm";
+         platform-unique;
+         status = "okay";
+-        pin_numbers = <13 12 11 15 4 37 10 9 8 1 14 35 36 34 46 39 40 45 32 33>;
+-        pin_names = "PROG", "DONE", "INIT","FPGA_LOAD_LOCK","LAN7800_RESET","ARM BUTTOM","PROG_EN_IN","LOADER_DETECT","INT_REBOOT","SRAM_LOCK","OTP_LOCK","LED0","LED1","LED2","GPIO0","GPIO1","GPIO2","GPIO3","GPIO4","GPIO5";
+-        pin_states = < GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_IN GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW >;
+-        pin_init_val = < 0 1 1 0 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1>;  
++        pin_numbers = <13 12 11 15 4 37 10 9 8 1 14 35 36 34 46 39 40 45 32 33 47>;
++        pin_names = "PROG", "DONE", "INIT","FPGA_LOAD_LOCK","LAN7800_RESET","ARM BUTTOM","PROG_EN_IN","LOADER_DETECT","INT_REBOOT","SRAM_LOCK","OTP_LOCK","LED0","LED1","LED2","GPIO0","GPIO1","GPIO2","GPIO3","GPIO4","GPIO5","BASE_DETECT";
++        pin_states = < GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_IN GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_IN GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW GPIOF_OUT_INIT_LOW>;
++        pin_init_val = < 0 1 1 0 1 1 1 1 0 0 0 0 0 0 1 1 1 1 1 1 1>;  
+         
+         interrupt-gpios = <&gpio2 17 IRQ_TYPE_EDGE_RISING>;
+        
+diff --git a/oe-logs b/oe-logs
+index 3f331defe2cc..ff878802cdb2 120000
+--- a/oe-logs
++++ b/oe-logs
+@@ -1 +1 @@
+-/media/superuser/GlobalStorage/Projects/3043-50/users/orel_e/decoder_pcb_yocto/build/tmp/work/imx8mpevk-poky-linux/linux-imx/5.15.71+git999-r0/temp
+\ No newline at end of file
++/media/superuser/GlobalStorage/Projects/3043-50/users/orel_e/decoder_pcb_yocto/build/tmp/work/base-poky-linux/linux-imx/5.15.71+git999-r0/temp
+\ No newline at end of file
+diff --git a/oe-workdir b/oe-workdir
+index bfc168ba2fb5..a3da44015eed 120000
+--- a/oe-workdir
++++ b/oe-workdir
+@@ -1 +1 @@
+-/media/superuser/GlobalStorage/Projects/3043-50/users/orel_e/decoder_pcb_yocto/build/tmp/work/imx8mpevk-poky-linux/linux-imx/5.15.71+git999-r0
+\ No newline at end of file
++/media/superuser/GlobalStorage/Projects/3043-50/users/orel_e/decoder_pcb_yocto/build/tmp/work/base-poky-linux/linux-imx/5.15.71+git999-r0
+\ No newline at end of file

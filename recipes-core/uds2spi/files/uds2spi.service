@@ -1,0 +1,9 @@
+[Unit]
+Description=uds2spi Service
+
+[Service]
+ExecStart=/usr/bin/uds2spi.sh
+
+[Install]
+WantedBy=multi-user.target
+

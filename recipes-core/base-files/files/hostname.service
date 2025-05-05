@@ -1,0 +1,9 @@
+[Unit]
+Description=hostname Service
+
+[Service]
+ExecStart=/usr/bin/hostname.sh
+
+[Install]
+WantedBy=multi-user.target
+
